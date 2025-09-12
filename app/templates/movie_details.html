@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ movie.title }} - Movie Details</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1><a href="/">Movie Recommender</a></h1>
+            <div class="nav-links">
+                <a href="/popular">Popular</a>
+                <a href="/trending">Trending</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="movie-details">
+        {% if movie.backdrop_url %}
+        <div class="backdrop" style="background-image: url('{{ movie.backdrop_url }}');">
+            <div class="backdrop-overlay"></div>
+        </div>
+        {% endif %}
+        
+        <div class="movie-content">
+            <div class="movie-poster">
+                {% if movie.poster_url %}
+                <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                {% else %}
+                <div class="no-poster">No Poster</div>
+                {% endif %}
+            </div>
+            
+            <div class="movie-info">
+                <h1>{{ movie.title }}</h1>
+                <div class="movie-meta">
+                    <span class="rating">⭐ {{ movie.rating }}/10</span>
+                    <span class="release-date">Released: {{ movie.release_date }}</span>
+                    {% if movie.runtime != 'N/A' %}
+                    <span class="runtime">{{ movie.runtime }} min</span>
+                    {% endif %}
+                </div>
+                
+                {% if movie.genres %}
+                <div class="genres">
+                    {% for genre in movie.genres %}
+                    <span class="genre-tag">{{ genre }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="overview">
+                    <h3>Overview</h3>
+                    <p>{{ movie.overview }}</p>
+                </div>
+                
+                {% if movie.budget > 0 or movie.revenue > 0 %}
+                <div class="financial-info">
+                    {% if movie.budget > 0 %}
+                    <div class="budget">
+                        <strong>Budget:</strong> ${{ "{:,}".format(movie.budget) }}
+                    </div>
+                    {% endif %}
+                    {% if movie.revenue > 0 %}
+                    <div class="revenue">
+                        <strong>Revenue:</strong> ${{ "{:,}".format(movie.revenue) }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

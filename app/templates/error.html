@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Movie Recommender</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1><a href="/">Movie Recommender</a></h1>
+            <div class="nav-links">
+                <a href="/popular">Popular</a>
+                <a href="/trending">Trending</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="error-container">
+            <h1>Oops! Something went wrong</h1>
+            <div class="error-message">
+                <h2>{{ error_code or '500' }}</h2>
+                <p>{{ error_message or 'Internal Server Error' }}</p>
+            </div>
+            <div class="error-actions">
+                <a href="/" class="btn">Go Home</a>
+                <button onclick="history.back()" class="btn btn-secondary">Go Back</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .error-container {
+            text-align: center;
+            padding: 4rem 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .error-message {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 3rem 2rem;
+            margin: 2rem 0;
+            border: 1px solid #e9ecef;
+        }
+
+        .error-message h2 {
+            font-size: 4rem;
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+
+        .error-message p {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+    </style>
+</body>
+</html>

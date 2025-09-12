@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommender</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1><a href="/">Movie Recommender</a></h1>
+            <div class="nav-links">
+                <a href="/popular">Popular</a>
+                <a href="/trending">Trending</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-section">
+            <h2>Search Movies</h2>
+            <input type="text" id="search-input" placeholder="Search for movies...">
+            <div id="search-results"></div>
+        </div>
+
+        <!-- Recommendation Section -->
+        <div class="recommendation-section">
+            <h2>Get Recommendations</h2>
+            <form method="POST" action="/recommend">
+                <div class="mode-switch">
+                    <label><input type="radio" name="mode" value="movie" {% if selected_mode != 'mood' %}checked{% endif %}> Recommend by Movie</label>
+                    <label><input type="radio" name="mode" value="mood" {% if selected_mode == 'mood' %}checked{% endif %}> Recommend by Mood</label>
+                </div>
+                <div id="movie-select" {% if selected_mode == 'mood' %}style="display:none;"{% endif %}>
+                    <label for="movie_title">Select a movie:</label>
+                    <select name="movie_title" id="movie_title">
+                        {% for title in movie_titles %}
+                        <option value="{{ title }}" {% if selected == title %}selected{% endif %}>{{ title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="mood-select" {% if selected_mode != 'mood' %}style="display:none;"{% endif %}>
+                    <label for="mood">Select your mood:</label>
+                    <select name="mood" id="mood">
+                        {% for mood in moods %}
+                        <option value="{{ mood }}" {% if selected_mood == mood %}selected{% endif %}>{{ mood|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit">Recommend</button>
+            </form>
+            
+            {% if error %}
+            <div class="error">{{ error }}</div>
+            {% endif %}
+            
+            {% if recommendations %}
+            <h3>Recommended Movies:</h3>
+            <ul class="recommendations">
+                {% for rec in recommendations %}
+                <li>{{ rec }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+
+        <!-- Popular Movies Section -->
+        {% if popular_movies %}
+        <div class="popular-section">
+            <h2>Popular Movies</h2>
+            <div class="movie-grid">
+                {% for movie in popular_movies %}
+                <div class="movie-card">
+                    <a href="/movie/{{ movie.id }}">
+                        {% if movie.poster_url %}
+                        <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                        {% else %}
+                        <div class="no-poster">No Poster</div>
+                        {% endif %}
+                        <h4>{{ movie.title }}</h4>
+                        <p class="rating">⭐ {{ movie.rating }}/10</p>
+                        <p class="overview">{{ movie.overview }}</p>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Toggle between recommendation modes
+        document.querySelectorAll('input[name="mode"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                if (this.value === 'movie') {
+                    document.getElementById('movie-select').style.display = '';
+                    document.getElementById('mood-select').style.display = 'none';
+                } else {
+                    document.getElementById('movie-select').style.display = 'none';
+                    document.getElementById('mood-select').style.display = '';
+                }
+            });
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                searchResults.innerHTML = '';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        displaySearchResults(data.results);
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                    });
+            }, 300);
+        });
+
+        function displaySearchResults(results) {
+            if (results.length === 0) {
+                searchResults.innerHTML = '<p>No results found</p>';
+                return;
+            }
+
+            let html = '<div class="search-results-list">';
+            results.forEach(movie => {
+                html += `
+                    <div class="search-result-item">
+                        <a href="/movie/${movie.id}">
+                            ${movie.poster_url ? `<img src="${movie.poster_url}" alt="${movie.title}">` : '<div class="no-poster">No Poster</div>'}
+                            <div class="movie-info">
+                                <h4>${movie.title}</h4>
+                                <p class="rating">⭐ ${movie.rating}/10</p>
+                                <p class="release-date">${movie.release_date}</p>
+                                <p class="overview">${movie.overview}</p>
+                            </div>
+                        </a>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            searchResults.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
