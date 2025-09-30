@@ -67,8 +67,8 @@ def build_similarity(movies):
     return similarity
 
 # Load model data once
-movies_path = "E:/Model/tmdb_5000_movies.csv"
-credits_path = "E:/Model/tmdb_5000_credits.csv"
+movies_path = "C:\\Users\\Mayank Singh Tomar\\OneDrive\\Desktop\\Project1\\CineMatches\\Cinematch\\tmdb_5000_movies.csv"
+credits_path = "C:\\Users\\Mayank Singh Tomar\\OneDrive\\Desktop\\Project1\\CineMatches\\Cinematch\\tmdb_5000_credits.csv"
 movies = load_data(movies_path, credits_path)
 movies = preprocess(movies)
 similarity = build_similarity(movies)
@@ -89,12 +89,29 @@ def recommend_by_mood(mood, movies, top_n=5):
     sample = filtered.sample(min(top_n, len(filtered)))
     recommendations = []
     for _, row in sample.iterrows():
+        movie_title = row.title_x
+        
+        # Try to find the movie on TMDB to get poster images
+        tmdb_movie = None
+        try:
+            search_results = tmdb_service.search_movies(movie_title)
+            if search_results and 'results' in search_results and search_results['results']:
+                # Find the best match (first result or exact title match)
+                for result in search_results['results']:
+                    if result['title'].lower() == movie_title.lower():
+                        tmdb_movie = result
+                        break
+                if not tmdb_movie:
+                    tmdb_movie = search_results['results'][0]  # Use first result as fallback
+        except Exception as e:
+            print(f"Error searching TMDB for {movie_title}: {e}")
+        
         recommendations.append({
             'id': int(row.id) if hasattr(row, 'id') else 0,
             'title': row.title_x,
             'overview': row.overview if hasattr(row, 'overview') else '',
-            'poster_path': None,
-            'backdrop_path': None,
+            'poster_path': tmdb_movie.get('poster_path') if tmdb_movie else None,
+            'backdrop_path': tmdb_movie.get('backdrop_path') if tmdb_movie else None,
             'release_date': row.release_date if hasattr(row, 'release_date') else '',
             'vote_average': float(row.vote_average) if hasattr(row, 'vote_average') else 0.0,
             'vote_count': int(row.vote_count) if hasattr(row, 'vote_count') else 0,
@@ -178,12 +195,29 @@ def recommend():
         
         for i in movie_list:
             movie_row = movies.iloc[i[0]]
+            movie_title = movie_row.title_x
+            
+            # Try to find the movie on TMDB to get poster images
+            tmdb_movie = None
+            try:
+                search_results = tmdb_service.search_movies(movie_title)
+                if search_results and 'results' in search_results and search_results['results']:
+                    # Find the best match (first result or exact title match)
+                    for result in search_results['results']:
+                        if result['title'].lower() == movie_title.lower():
+                            tmdb_movie = result
+                            break
+                    if not tmdb_movie:
+                        tmdb_movie = search_results['results'][0]  # Use first result as fallback
+            except Exception as e:
+                print(f"Error searching TMDB for {movie_title}: {e}")
+            
             recommendations.append({
                 'id': int(movie_row.id) if hasattr(movie_row, 'id') else 0,
                 'title': movie_row.title_x,
                 'overview': movie_row.overview if hasattr(movie_row, 'overview') else '',
-                'poster_path': None,
-                'backdrop_path': None,
+                'poster_path': tmdb_movie.get('poster_path') if tmdb_movie else None,
+                'backdrop_path': tmdb_movie.get('backdrop_path') if tmdb_movie else None,
                 'release_date': movie_row.release_date if hasattr(movie_row, 'release_date') else '',
                 'vote_average': float(movie_row.vote_average) if hasattr(movie_row, 'vote_average') else 0.0,
                 'vote_count': int(movie_row.vote_count) if hasattr(movie_row, 'vote_count') else 0,

@@ -11,6 +11,14 @@ export const MovieCard = ({ movie, className = '' }: MovieCardProps) => {
   const posterUrl = getImageUrl(movie.poster_path);
   const rating = movie.vote_average;
   const ratingClass = getRatingClass(rating);
+  
+  // Debug logging
+  console.log('MovieCard Debug:', {
+    title: movie.title,
+    poster_path: movie.poster_path,
+    posterUrl: posterUrl,
+    movie: movie
+  });
 
   return (
     <Link
@@ -23,6 +31,13 @@ export const MovieCard = ({ movie, className = '' }: MovieCardProps) => {
           alt={movie.title}
           className="movie-card-poster group-hover:scale-110 transition-transform duration-500"
           loading="lazy"
+          onError={(e) => {
+            console.log(`Image failed to load for ${movie.title}: ${posterUrl}`);
+            e.currentTarget.src = '/placeholder.svg';
+          }}
+          onLoad={() => {
+            console.log(`Image loaded successfully for ${movie.title}: ${posterUrl}`);
+          }}
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
         
